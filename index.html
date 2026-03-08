@@ -795,5 +795,57 @@
             return `<svg viewBox="0 0 200 200" width="100%" height="100%" style="max-height: 100%;"><circle cx="100" cy="100" r="95" fill="${animal.bg}"/><g>${animal.ears}${bodyModifier}${leftArm}<circle cx="100" cy="90" r="40" fill="${animal.color}"/>${animal.extraFace || ''}${blush}${eyes}${mouth}${propLayer}${rightArm}${foregroundLayer}</g></svg>`;
         }
     </script>
+<!-- 答錯次數升級補丁開始 -->
+<script>
+    // 1. 建立一個專屬嘅計數器 (避免同你原本嘅代碼撞名)
+    window.myGameWrongAttempts = 0;
+
+    // 2. 攔截並保留原本嘅 initRound (自動喺每局重置次數)
+    const originalInitRound = initRound;
+    initRound = function() {
+        window.myGameWrongAttempts = 0; 
+        if (originalInitRound) originalInitRound(); 
+    };
+
+    // 3. 直接覆蓋原本嘅 checkVoiceAnswer 語音檢查邏輯
+    checkVoiceAnswer = function(transcript) {
+        if (isAnsweredCorrectly) return;
+
+        const correctKeywords = animals[targetAnimalKey].keywords;
+        const isCorrect = correctKeywords.some(kw => transcript.includes(kw));
+
+        if (isCorrect) {
+            revealAnswers();
+            checkAnswer(targetAnimalKey);
+        } else {
+            let isOtherAnimal = false;
+            for (let key in animals) {
+                if (key !== targetAnimalKey && animals[key].keywords.some(kw => transcript.includes(kw))) {
+                    isOtherAnimal = true;
+                    window.myGameWrongAttempts++; 
+                    
+                    if (window.myGameWrongAttempts === 1) {
+                        // 第一次答錯：只出聲同字提示，唔彈出選項
+                        if (typeof playSound === 'function') playSound('wrong'); 
+                        if (typeof showMessage === 'function') showMessage('❌ 唔係佢喎，再試吓啦！', '#EF5350');
+                        if (typeof speakText === 'function') speakText('唔係佢喎，再試吓啦！');
+                    } else {
+                        // 第二次答錯：出選項
+                        revealAnswers();
+                        checkAnswer(key); 
+                    }
+                    break;
+                }
+            }
+            
+            if (!isOtherAnimal) {
+                if (typeof showMessage === 'function') showMessage('聽唔清楚，再講一次吖！', '#FF9800');
+                if (typeof speakText === 'function') speakText('聽唔清楚，再講一次吖');
+            }
+        }
+    };
+</script>
+<!-- 答錯次數升級補丁結束 -->
 </body>
 </html>
+
