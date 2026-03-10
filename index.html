@@ -27,7 +27,6 @@
             align-items: center;
             min-height: 100vh;
             user-select: none;
-            /* 允許垂直捲動以防螢幕太小，但隱藏水平捲動 */
             overflow-x: hidden; 
             overflow-y: auto;
         }
@@ -131,24 +130,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: all 0.3s ease;
         }
         .btn-mic:active { transform: translateY(6px); box-shadow: 0 0 0 #8e44ad; }
         .btn-mic.listening { background: #e74c3c; box-shadow: 0 6px 0 #c0392b; animation: pulse-mic 1s infinite; }
         .btn-mic.shake-anim { animation: shake 0.5s; }
 
-        /* 上方動作展示區 - 響應式排版 (解決超出版面問題) */
+        /* 上方動作展示區 - 響應式排版 */
         .action-grid {
             display: grid;
             gap: 10px;
             width: 100%;
             max-width: 800px;
             margin-bottom: 15px;
-            /* 預設手機直向：2欄 */
             grid-template-columns: repeat(2, 1fr);
             justify-items: center;
         }
-        
-        /* 橫向模式 或 螢幕夠寬時：4欄 */
         @media (min-width: 600px) or (orientation: landscape) {
             .action-grid { grid-template-columns: repeat(4, 1fr); }
         }
@@ -163,7 +160,6 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            /* 關鍵：限制最大高度，防止直向時圖案把整個螢幕撐爆 */
             max-height: 22vh; 
             max-width: 180px;
             aspect-ratio: 1 / 1;
@@ -200,19 +196,28 @@
 
         /* 控制按鈕區 */
         .controls-area { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; }
-        .btn-hint { background: var(--info); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 24px; font-weight: bold; box-shadow: 0 6px 0 #2980b9; animation: pulse-soft 2s infinite; }
-        .btn-next { background: var(--success); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 26px; font-weight: bold; box-shadow: 0 6px 0 #2E7D32; display: none; animation: pulse 1.5s infinite; }
+        .btn-hint { background: var(--info); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 24px; font-weight: bold; box-shadow: 0 6px 0 #2980b9; animation: pulse-soft 2s infinite; cursor: pointer; }
+        .btn-next { background: var(--success); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 26px; font-weight: bold; box-shadow: 0 6px 0 #2E7D32; display: none; animation: pulse 1.5s infinite; cursor: pointer; }
 
         /* 訊息提示 */
         .message-overlay {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
             background: rgba(255, 255, 255, 0.95); padding: 20px 40px; border-radius: 20px;
-            font-size: clamp(24px, 5vw, 42px); font-weight: bold; z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2); transition: transform 0.3s ease; text-align: center; white-space: nowrap;
+            font-size: clamp(20px, 4.5vw, 36px); font-weight: bold; z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); transition: transform 0.3s ease; 
+            text-align: center; white-space: pre-wrap; line-height: 1.4;
+            border: 4px solid currentColor;
+            width: 80%; max-width: 500px; pointer-events: none;
         }
         .message-overlay.show { transform: translate(-50%, -50%) scale(1); }
 
-        #recordingStatus { position: fixed; bottom: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 100; font-size: 18px; }
+        /* 錄音狀態即時顯示 */
+        #recordingStatus { 
+            position: fixed; bottom: 20px; background: rgba(0,0,0,0.8); color: #FFD166; 
+            padding: 10px 20px; border-radius: 30px; display: none; z-index: 100; 
+            font-size: clamp(18px, 4vw, 24px); font-weight: bold; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
@@ -255,7 +260,7 @@
         <div class="action-grid" id="actionCardsContainer"></div>
 
         <div class="controls-area" id="showHintArea">
-            <button class="btn-hint" onclick="revealAnswers()">💡 提示</button>
+            <button class="btn-hint" onclick="revealAnswers()">💡 點選圖片作答</button>
         </div>
 
         <div class="answer-section" id="answerSection">
@@ -277,12 +282,12 @@
     </div>
 
     <div class="message-overlay" id="messageOverlay"></div>
-    <div id="recordingStatus">聆聽中...請講出動物名</div>
+    <div id="recordingStatus">聆聽中...</div>
 
     <script>
         const animals = {
             'bear': { name: '小熊', keywords: ['熊', 'bear', '小熊'], color: '#C68B59', bg: '#E8F4F8', ears: `<circle cx="65" cy="55" r="18" fill="#C68B59"/><circle cx="135" cy="55" r="18" fill="#C68B59"/><circle cx="65" cy="55" r="10" fill="#E6B999"/><circle cx="135" cy="55" r="10" fill="#E6B999"/>` },
-            'cat': { name: '小貓', keywords: ['貓', 'cat', '小貓'], color: '#F9B233', bg: '#F3F8E8', ears: `<polygon points="50,70 65,30 85,60" fill="#F9B233"/><polygon points="150,70 135,30 115,60" fill="#F9B233"/><polygon points="56,65 65,42 77,60" fill="#FFDCA8"/><polygon points="144,65 135,42 123,60" fill="#FFDCA8"/>`, extraFace: `<path d="M 60 95 L 40 90 M 60 100 L 38 100 M 60 105 L 40 110 M 140 95 L 160 90 M 140 100 L 162 100 M 140 105 L 160 110" stroke="#B07A1D" stroke-width="2" stroke-linecap="round"/>` },
+            'cat': { name: '小貓', keywords: ['貓', 'cat', '小貓', '喵'], color: '#F9B233', bg: '#F3F8E8', ears: `<polygon points="50,70 65,30 85,60" fill="#F9B233"/><polygon points="150,70 135,30 115,60" fill="#F9B233"/><polygon points="56,65 65,42 77,60" fill="#FFDCA8"/><polygon points="144,65 135,42 123,60" fill="#FFDCA8"/>`, extraFace: `<path d="M 60 95 L 40 90 M 60 100 L 38 100 M 60 105 L 40 110 M 140 95 L 160 90 M 140 100 L 162 100 M 140 105 L 160 110" stroke="#B07A1D" stroke-width="2" stroke-linecap="round"/>` },
             'rabbit': { name: '小兔', keywords: ['兔', 'rabbit', '小兔'], color: '#FFFFFF', bg: '#FFF0F5', ears: `<ellipse cx="75" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(-15 75 40)"/><ellipse cx="125" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(15 125 40)"/><ellipse cx="75" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(-15 75 45)"/><ellipse cx="125" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(15 125 45)"/>` },
             'frog': { name: '青蛙', keywords: ['蛙', 'frog', '青蛙'], color: '#81C784', bg: '#FFFDE7', ears: `<circle cx="70" cy="65" r="18" fill="#81C784"/><circle cx="130" cy="65" r="18" fill="#81C784"/>`, isFrog: true }
         };
@@ -333,107 +338,122 @@
             }
         }
 
-        // === 強化的語音辨識機制 ===
+        // === 語音辨識機制 (完全對齊成功案例) ===
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
+        let currentRec = null;
         let isListening = false;
 
-        if (SpeechRecognition) {
-            try {
-                recognition = new SpeechRecognition();
-                recognition.lang = 'yue-Hant-HK'; 
-                recognition.continuous = false;
-                recognition.interimResults = false;
-
-                recognition.onstart = function() {
-                    isListening = true;
-                    document.getElementById('micBtn').classList.add('listening');
-                    document.getElementById('recordingStatus').style.display = 'block';
-                };
-
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    checkVoiceAnswer(transcript);
-                };
-
-                recognition.onerror = function(event) {
-                    stopListening();
-                    console.error("語音錯誤:", event.error);
-                    
-                    // 偵測是否為本地端開啟 (file://)
-                    const isLocalFile = window.location.protocol === 'file:';
-
-                    if (event.error === 'not-allowed') {
-                        if (isLocalFile) {
-                            alert("⚠️ 蘋果系統限制警告：\n您目前是直接從檔案打開遊戲。Safari 嚴格規定「必須在 HTTPS 網站上」才能開啟麥克風，因此自動封鎖了錄音功能。\n\n💡 解決方式：\n請先使用畫面上的「💡 提示」按鈕，改為『手動點擊圖片』來讓小朋友遊玩！");
-                        } else {
-                            alert("錄音失敗：麥克風權限被拒絕。\n(iPad 請至「設定 > Safari > 麥克風」選擇允許)");
-                        }
-                    } else if (event.error === 'service-not-allowed') {
-                        alert("⚠️ 語音服務無法使用！\n請確保您的 iPad 在「設定 > 一般 > 鍵盤」中已經開啟了「啟用聽寫」功能。\n如果暫時無法開啟，請點擊「💡 提示」改用點擊圖片的方式遊玩。");
-                    } else if (event.error === 'network') {
-                        alert("錄音失敗：請檢查網路連線。");
-                    } else if (event.error !== 'no-speech') {
-                        alert("錄音系統發生錯誤：" + event.error + "\n(請暫時使用「💡 提示」按鈕進行遊戲)");
-                    }
-                };
-
-                recognition.onend = function() { stopListening(); };
-            } catch (e) {
-                console.error("SpeechRecognition 初始化失敗", e);
-                recognition = null;
-            }
-        }
-
         function toggleListening() {
-            initAudio(); // 確保使用者互動
-            if (!recognition) {
-                alert("此瀏覽器/環境無法使用語音功能。\n\n建議您先點擊「💡 提示」按鈕，改用點擊圖片的方式遊玩！");
+            initAudio(); 
+
+            // 如果正在聽，就停止
+            if (isListening && currentRec) {
+                stopListening();
                 return;
             }
-            if (isListening) {
-                stopListening();
-            } else {
-                try {
-                    recognition.start();
-                } catch (e) {
-                    console.error("start() 錯誤:", e);
-                    
-                    if (window.location.protocol === 'file:') {
-                        alert("⚠️ 蘋果系統限制警告：\n您目前是直接從檔案打開遊戲。Safari 嚴格規定「必須在 HTTPS 網站上」才能開啟麥克風。\n\n💡 解決方式：\n請先使用畫面上的「💡 提示」按鈕，改為『手動點擊圖片』來遊玩！");
-                    } else {
-                        alert("啟動麥克風失敗，請重新整理網頁再試一次。");
+
+            if (!SpeechRecognition) {
+                showMessage('瀏覽器不支援語音功能\n請直接點擊圖片作答！', '#FF9800', 2500);
+                revealAnswers();
+                return;
+            }
+
+            try {
+                // 【秘訣一】在點擊的當下，重新建立 Recognition 物件，迎合 Safari 的嚴格驗證
+                const rec = new SpeechRecognition();
+                
+                // 【秘訣二】使用 zh-HK，這是蘋果聽寫最穩定支援的語言代碼
+                rec.lang = 'zh-HK'; 
+                
+                // 【秘訣三】開啟即時結果 (interimResults)，提升遊戲反應速度
+                rec.interimResults = true;
+                rec.continuous = false;
+
+                rec.onstart = function() {
+                    isListening = true;
+                    currentRec = rec;
+                    document.getElementById('micBtn').classList.add('listening');
+                    const status = document.getElementById('recordingStatus');
+                    status.style.display = 'block';
+                    status.textContent = '🎤 聽緊你講...';
+                };
+
+                rec.onresult = function(event) {
+                    let transcript = '';
+                    let isFinal = false;
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        transcript += event.results[i][0].transcript;
+                        if (event.results[i].isFinal) isFinal = true;
                     }
+                    
+                    // 畫面上即時顯示聽到的字，讓小朋友有互動感
+                    if (transcript) {
+                        document.getElementById('recordingStatus').textContent = '聽到：' + transcript;
+                    }
+                    
+                    checkVoiceAnswer(transcript, isFinal);
+                };
+
+                rec.onerror = function(event) {
                     stopListening();
-                }
+                    console.error("語音錯誤:", event.error);
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        showMessage('🍎 麥克風未開啟 🍎\n請點擊下方圖片作答！', '#FF9800', 3000);
+                        revealAnswers();
+                    }
+                };
+
+                rec.onend = function() { 
+                    stopListening(); 
+                };
+
+                rec.start();
+                
+            } catch (e) {
+                console.error("啟動失敗:", e);
+                stopListening();
             }
         }
 
         function stopListening() {
-            if(recognition && isListening) { try { recognition.stop(); } catch(e) {} }
             isListening = false;
+            if (currentRec) {
+                try { currentRec.stop(); } catch(e) {}
+                currentRec = null;
+            }
             document.getElementById('micBtn').classList.remove('listening');
             document.getElementById('recordingStatus').style.display = 'none';
         }
 
-        function checkVoiceAnswer(transcript) {
+        // 結合即時辨識的判斷邏輯
+        function checkVoiceAnswer(transcript, isFinal) {
             if (isAnsweredCorrectly) return;
             const correctKeywords = animals[targetAnimalKey].keywords;
+            
+            // 只要一聽到包含正確答案，直接算過關 (不需要等整句講完)
             if (correctKeywords.some(kw => transcript.includes(kw))) {
-                revealAnswers(); checkAnswer(targetAnimalKey);
-            } else {
+                stopListening(); // 答對馬上停止錄音
+                revealAnswers(); 
+                checkAnswer(targetAnimalKey);
+            } 
+            // 如果這句話講完了 (isFinal) 卻還沒答對，才給錯誤提示
+            else if (isFinal) {
                 let isOtherAnimal = false;
                 for (let key in animals) {
                     if (key !== targetAnimalKey && animals[key].keywords.some(kw => transcript.includes(kw))) {
                         isOtherAnimal = true;
-                        playSound('wrong'); showMessage('❌ 唔係佢喎！', '#EF5350');
+                        playSound('wrong'); 
+                        showMessage(`聽到: ${transcript}\n❌ 唔係佢喎！`, '#EF5350', 2000);
                         document.getElementById('micBtn').classList.add('shake-anim');
                         setTimeout(() => document.getElementById('micBtn').classList.remove('shake-anim'), 500);
                         speakText(`唔係佢喎。再聽多次，邊個喺度 ${actions[currentTargetAction].text} 呀？`);
                         break;
                     }
                 }
-                if (!isOtherAnimal) { showMessage('聽唔清楚，再講一次！', '#FF9800'); speakText('聽唔清楚，再講一次'); }
+                if (!isOtherAnimal && transcript.trim() !== '') { 
+                    showMessage(`聽到: ${transcript}\n聽唔清楚，再講一次！`, '#FF9800', 2000); 
+                    speakText('聽唔清楚，再講一次'); 
+                }
             }
         }
 
@@ -444,7 +464,10 @@
 
         function initRound() {
             isAnsweredCorrectly = false; stopListening();
-            document.getElementById('nextBtn').style.display = 'none'; document.getElementById('answerSection').style.display = 'none'; document.getElementById('showHintArea').style.display = 'flex';
+            document.getElementById('nextBtn').style.display = 'none'; 
+            document.getElementById('answerSection').style.display = 'none'; 
+            document.getElementById('showHintArea').style.display = 'flex';
+
             const selectedAnimals = shuffle(Object.keys(animals)).slice(0, 4);
             const selectedActions = shuffle(Object.keys(actions)).slice(0, 4);
             const roundCards = selectedAnimals.map((animal, i) => ({ animal, action: selectedActions[i] }));
@@ -477,21 +500,30 @@
                 isAnsweredCorrectly = true; stopListening(); answerCard.classList.add('correct'); playSound('correct'); currentScore++; updateProgress();
                 document.querySelectorAll('.answer-card').forEach(c => { if (c.id !== `answer-${targetAnimalKey}`) c.classList.add('disabled'); });
                 if (currentScore >= targetScore) {
-                    showMessage('🎉 好叻呀！', '#4CAF50'); speakText('恭喜你過關喇！你真係好叻！');
+                    showMessage('🎉 好叻呀！', '#4CAF50', 3000); speakText('恭喜你過關喇！你真係好叻！');
                     setTimeout(() => { document.getElementById('gamePage').classList.remove('active'); document.getElementById('winPage').classList.add('active'); }, 3000);
                 } else {
-                    showMessage('🎉 答啱喇！', '#4CAF50'); speakText('答啱喇！');
+                    showMessage('🎉 答啱喇！', '#4CAF50', 1500); speakText('答啱喇！');
                     document.getElementById('nextBtn').style.display = 'block';
                 }
             } else {
-                playSound('wrong'); answerCard.classList.add('wrong'); showMessage('❌ 唔係佢喎！', '#EF5350');
+                playSound('wrong'); answerCard.classList.add('wrong'); showMessage('❌ 唔係佢喎！', '#EF5350', 1500);
                 speakText(`唔係佢喎。再聽多次，邊個喺度 ${actions[currentTargetAction].text} 呀？`);
                 setTimeout(() => { answerCard.classList.remove('wrong'); }, 500);
             }
         }
 
         function shuffle(arr) { for(let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
-        function showMessage(text, color) { const overlay = document.getElementById('messageOverlay'); overlay.textContent = text; overlay.style.color = color; overlay.classList.add('show'); setTimeout(() => { overlay.classList.remove('show'); }, 1500); }
+        
+        let messageTimeout;
+        function showMessage(text, color, duration = 1500) { 
+            clearTimeout(messageTimeout);
+            const overlay = document.getElementById('messageOverlay'); 
+            overlay.textContent = text; 
+            overlay.style.color = color; 
+            overlay.classList.add('show'); 
+            messageTimeout = setTimeout(() => { overlay.classList.remove('show'); }, duration); 
+        }
 
         function generateSVG(animalKey, actKey) {
             const animal = animals[animalKey]; const isFrog = animal.isFrog;
