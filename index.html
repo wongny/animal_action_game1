@@ -2,12 +2,10 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>動物動作互動問答遊戲</title>
     <style>
-        /* 跨平台標楷體設定：
-           BiauKai (Mac/iOS), DFKai-SB (Windows), Kaiti TC (Mac), STKaiti (其他), serif (備用) 
-        */
+        /* 跨平台標楷體設定 */
         :root {
             --primary: #FF8C42;
             --success: #4CAF50;
@@ -29,22 +27,20 @@
             align-items: center;
             min-height: 100vh;
             user-select: none;
-            overflow-x: hidden;
+            /* 允許垂直捲動以防螢幕太小，但隱藏水平捲動 */
+            overflow-x: hidden; 
+            overflow-y: auto;
         }
 
-        /* 確保所有按鈕和特殊元素都繼承標楷體 */
-        button, input, select, textarea {
-            font-family: inherit;
-        }
+        button, input, select, textarea { font-family: inherit; }
 
-        /* 頁面切換 */
         .page {
             display: none;
             width: 100%;
             max-width: 900px;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             animation: fadeIn 0.5s;
         }
@@ -54,36 +50,23 @@
         .cover-container {
             text-align: center;
             background: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 5vh;
+            margin-top: 2vh;
             border: 5px dashed var(--primary);
+            width: 90%;
+            max-width: 600px;
         }
-        .cover-title {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 0px #FFE0B2;
-            font-weight: bold;
-        }
-        .cover-img {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 30px;
-            background: #FFF0F5;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 80px;
-        }
+        .cover-title { font-size: clamp(32px, 6vw, 48px); color: var(--primary); margin-bottom: 15px; font-weight: bold; }
+        .cover-img { font-size: 80px; margin: 0 auto 20px; }
+        
         .btn-large {
             background: var(--success);
             color: white;
-            font-size: 32px;
+            font-size: clamp(24px, 5vw, 32px);
             font-weight: bold;
-            padding: 15px 50px;
+            padding: 15px 40px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
@@ -91,7 +74,6 @@
             transition: all 0.2s;
             animation: pulse 1.5s infinite;
         }
-        .btn-large:hover { transform: translateY(3px); box-shadow: 0 5px 0 #2E7D32; }
         .btn-large:active { transform: translateY(8px); box-shadow: 0 0 0 #2E7D32; animation: none; }
 
         /* 遊戲區標題與進度 */
@@ -101,35 +83,16 @@
             justify-content: space-between;
             align-items: center;
             background: white;
-            padding: 15px 20px;
+            padding: 10px 20px;
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-sizing: border-box;
         }
-        .header h1 { margin: 0; font-size: 28px; color: var(--primary); font-weight: bold; }
-        
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-            color: var(--info);
-            font-size: 24px;
-        }
-        .progress-bar-bg {
-            width: 150px;
-            height: 15px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--success);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
+        .header h1 { margin: 0; font-size: clamp(20px, 4vw, 28px); color: var(--primary); }
+        .progress-container { display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--info); font-size: 20px; }
+        .progress-bar-bg { width: 100px; height: 12px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s ease; }
 
         /* 問題區與錄音 */
         .question-wrapper {
@@ -138,14 +101,14 @@
             justify-content: center;
             gap: 15px;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
         }
         .question-box {
             background: #fff;
-            padding: 15px 30px;
+            padding: 10px 20px;
             border-radius: 50px;
-            font-size: 32px;
+            font-size: clamp(22px, 5vw, 32px);
             font-weight: bold;
             color: #34495e;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
@@ -153,230 +116,131 @@
             text-align: center;
             flex-grow: 1;
         }
-        .question-highlight {
-            color: #E74C3C;
-            font-size: 38px;
-            margin: 0 10px;
-            text-decoration: underline;
-            text-decoration-color: #FFD166;
-            text-decoration-thickness: 4px;
-        }
+        .question-highlight { color: #E74C3C; font-size: 1.2em; margin: 0 5px; text-decoration: underline; text-decoration-color: #FFD166; }
         
-        /* 錄音按鈕 */
         .btn-mic {
             background: #9b59b6;
             color: white;
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
-            font-size: 30px;
+            font-size: 28px;
             cursor: pointer;
             box-shadow: 0 6px 0 #8e44ad;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s;
         }
         .btn-mic:active { transform: translateY(6px); box-shadow: 0 0 0 #8e44ad; }
-        .btn-mic.listening {
-            background: #e74c3c;
-            box-shadow: 0 6px 0 #c0392b;
-            animation: pulse-mic 1s infinite;
-        }
-        
-        @keyframes pulse-mic {
-            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(231, 76, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
-        }
+        .btn-mic.listening { background: #e74c3c; box-shadow: 0 6px 0 #c0392b; animation: pulse-mic 1s infinite; }
+        .btn-mic.shake-anim { animation: shake 0.5s; }
 
-        /* 上方動作展示區 */
+        /* 上方動作展示區 - 響應式排版 (解決超出版面問題) */
         .action-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 10px;
             width: 100%;
-            margin-bottom: 20px;
+            max-width: 800px;
+            margin-bottom: 15px;
+            /* 預設手機直向：2欄 */
+            grid-template-columns: repeat(2, 1fr);
+            justify-items: center;
         }
-        @media (min-width: 768px) { .action-grid { grid-template-columns: repeat(4, 1fr); } }
+        
+        /* 橫向模式 或 螢幕夠寬時：4欄 */
+        @media (min-width: 600px) or (orientation: landscape) {
+            .action-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
         .action-card {
             background: white;
             border: 4px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 10px;
+            border-radius: 15px;
+            padding: 5px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
+            /* 關鍵：限制最大高度，防止直向時圖案把整個螢幕撐爆 */
+            max-height: 22vh; 
+            max-width: 180px;
             aspect-ratio: 1 / 1;
+            box-sizing: border-box;
         }
-
-        /* 提示按鈕 */
-        .btn-hint {
-            background: var(--info);
-            color: white;
-            padding: 12px 40px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #2980b9;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            transition: all 0.2s;
-            animation: pulse-soft 2s infinite;
-        }
-        .btn-hint:hover { transform: translateY(2px); box-shadow: 0 4px 0 #2980b9; }
-        .btn-hint:active { transform: translateY(6px); box-shadow: 0 0 0 #2980b9; animation: none; }
+        .action-card svg { width: 100%; height: 100%; }
 
         /* 隱藏的選項區域 */
-        .answer-section {
-            width: 100%;
-            display: none;
-            animation: slideDownFade 0.5s ease forwards;
-        }
+        .answer-section { width: 100%; display: none; animation: slideDownFade 0.5s ease forwards; }
         .divider {
-            width: 100%;
-            height: 4px;
-            background-color: #e2e8f0;
-            border-radius: 2px;
-            margin: 10px 0 20px 0;
-            position: relative;
+            width: 100%; height: 2px; background-color: #e2e8f0; margin: 15px 0; position: relative;
         }
         .divider::after {
             content: '請選擇或讀出邊隻動物：';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--bg);
-            padding: 0 15px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #7f8c8d;
-            white-space: nowrap;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background-color: var(--bg); padding: 0 10px; font-size: clamp(18px, 4vw, 24px);
+            font-weight: bold; color: #7f8c8d; white-space: nowrap;
         }
+        
         .answer-area {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            margin-bottom: 30px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; margin-bottom: 20px;
         }
         .answer-card {
-            background: white;
-            border: 4px solid #bdc3c7;
-            border-radius: 20px;
-            width: 100px;
-            height: 100px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: white; border: 4px solid #bdc3c7; border-radius: 15px;
+            width: clamp(70px, 20vw, 110px);
+            height: clamp(70px, 20vw, 110px);
+            padding: 8px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; justify-content: center; align-items: center;
         }
-        @media (min-width: 768px) {
-            .answer-card { width: 130px; height: 130px; padding: 15px; }
-        }
-        .answer-card:hover { transform: translateY(-5px) scale(1.05); border-color: var(--primary); }
+        .answer-card:active { transform: scale(0.95); }
         .answer-card.correct { border-color: var(--success); background-color: #e8f5e9; animation: bounce 0.5s; }
         .answer-card.wrong { border-color: var(--error); background-color: #ffebee; animation: shake 0.5s; }
         .answer-card.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(0.5); }
 
-        .controls-area {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin-bottom: 30px;
-            min-height: 60px;
-        }
-        .btn-next {
-            background: var(--success);
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #2E7D32;
-            display: none;
-            font-size: 30px;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-        }
-        .btn-next:hover { transform: translateY(2px); box-shadow: 0 4px 0 #2E7D32; }
-        .btn-next:active { transform: translateY(6px); box-shadow: 0 0 0 #2E7D32; }
+        /* 控制按鈕區 */
+        .controls-area { display: flex; justify-content: center; width: 100%; margin-bottom: 20px; }
+        .btn-hint { background: var(--info); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 24px; font-weight: bold; box-shadow: 0 6px 0 #2980b9; animation: pulse-soft 2s infinite; }
+        .btn-next { background: var(--success); color: white; padding: 10px 30px; border: none; border-radius: 50px; font-size: 26px; font-weight: bold; box-shadow: 0 6px 0 #2E7D32; display: none; animation: pulse 1.5s infinite; }
 
         /* 訊息提示 */
         .message-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px 60px;
-            border-radius: 30px;
-            font-size: 42px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-            text-align: center;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: rgba(255, 255, 255, 0.95); padding: 20px 40px; border-radius: 20px;
+            font-size: clamp(24px, 5vw, 42px); font-weight: bold; z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); transition: transform 0.3s ease; text-align: center; white-space: nowrap;
         }
         .message-overlay.show { transform: translate(-50%, -50%) scale(1); }
 
-        /* 錄音狀態提示 */
-        #recordingStatus {
-            position: fixed;
-            bottom: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: none;
-            z-index: 100;
-            font-size: 20px;
-        }
+        #recordingStatus { position: fixed; bottom: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; display: none; z-index: 100; font-size: 18px; }
 
-        /* 動畫 */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes pulse-soft { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .confetti { position: fixed; width: 15px; height: 15px; background-color: #f2d74e; opacity: 0; z-index: 999; pointer-events: none; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes pulse-mic { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
     </style>
 </head>
 <body>
 
-    <!-- 封面頁 -->
     <div id="coverPage" class="page active">
         <div class="cover-container">
             <div class="cover-img">🦁</div>
             <h1 class="cover-title">動物動作互動問答</h1>
-            <p style="font-size: 26px; color: #7f8c8d; margin-bottom: 30px; line-height: 1.6; font-weight: bold;">
+            <p style="font-size: clamp(18px, 4vw, 24px); color: #7f8c8d; margin-bottom: 25px; line-height: 1.5; font-weight: bold;">
                 聽問題，搵出啱嘅動物！<br>
-                你可以㩒「提示」揀圖，或者用「🎤 錄音」讀出動物名！<br>
-                <span style="color: var(--primary);">（答對 10 題就過關喇！）</span>
+                你可以㩒「提示」揀圖，或者用「🎤 錄音」讀出動物名！
             </p>
-            <button class="btn-large" onclick="startGame()">▶️ 開始遊戲</button>
+            <button class="btn-large" id="startBtn">▶️ 開始遊戲</button>
         </div>
     </div>
 
-    <!-- 遊戲頁 -->
     <div id="gamePage" class="page">
         <div class="header">
             <h1>🐾 搵動物遊戲</h1>
             <div class="progress-container">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBar"></div>
-                </div>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
                 <span id="scoreText">0 / 10</span>
             </div>
         </div>
@@ -385,19 +249,15 @@
             <div class="question-box" id="questionBox">
                 邊個喺度 <span class="question-highlight" id="actionText">...</span> 呀？
             </div>
-            <!-- 錄音按鈕 -->
             <button class="btn-mic" id="micBtn" onclick="toggleListening()" title="錄音作答">🎤</button>
         </div>
 
-        <!-- 動作展示區 -->
         <div class="action-grid" id="actionCardsContainer"></div>
 
-        <!-- 提示按鈕區塊 -->
         <div class="controls-area" id="showHintArea">
             <button class="btn-hint" onclick="revealAnswers()">💡 提示</button>
         </div>
 
-        <!-- 隱藏的選項區塊 -->
         <div class="answer-section" id="answerSection">
             <div class="divider"></div>
             <div class="answer-area" id="answerCardsContainer"></div>
@@ -408,14 +268,10 @@
         </div>
     </div>
 
-    <!-- 過關頁 -->
     <div id="winPage" class="page">
         <div class="cover-container" style="border-color: var(--success);">
-            <div class="cover-img" style="background: #E8F5E9;">🏆</div>
+            <div class="cover-img">🏆</div>
             <h1 class="cover-title" style="color: var(--success);">恭喜過關！</h1>
-            <p style="font-size: 32px; font-weight: bold; color: #34495e; margin-bottom: 30px;">
-                你好叻呀！成功答啱咗 10 題！🎉
-            </p>
             <button class="btn-large" onclick="resetGame()">🔄 再玩一次</button>
         </div>
     </div>
@@ -424,11 +280,10 @@
     <div id="recordingStatus">聆聽中...請講出動物名</div>
 
     <script>
-        // === 資料庫 ===
         const animals = {
-            'bear': { name: '小熊', keywords: ['熊', 'bear'], color: '#C68B59', bg: '#E8F4F8', ears: `<circle cx="65" cy="55" r="18" fill="#C68B59"/><circle cx="135" cy="55" r="18" fill="#C68B59"/><circle cx="65" cy="55" r="10" fill="#E6B999"/><circle cx="135" cy="55" r="10" fill="#E6B999"/>` },
-            'cat': { name: '小貓', keywords: ['貓', 'cat'], color: '#F9B233', bg: '#F3F8E8', ears: `<polygon points="50,70 65,30 85,60" fill="#F9B233"/><polygon points="150,70 135,30 115,60" fill="#F9B233"/><polygon points="56,65 65,42 77,60" fill="#FFDCA8"/><polygon points="144,65 135,42 123,60" fill="#FFDCA8"/>`, extraFace: `<path d="M 60 95 L 40 90 M 60 100 L 38 100 M 60 105 L 40 110 M 140 95 L 160 90 M 140 100 L 162 100 M 140 105 L 160 110" stroke="#B07A1D" stroke-width="2" stroke-linecap="round"/>` },
-            'rabbit': { name: '小兔', keywords: ['兔', 'rabbit'], color: '#FFFFFF', bg: '#FFF0F5', ears: `<ellipse cx="75" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(-15 75 40)"/><ellipse cx="125" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(15 125 40)"/><ellipse cx="75" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(-15 75 45)"/><ellipse cx="125" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(15 125 45)"/>` },
+            'bear': { name: '小熊', keywords: ['熊', 'bear', '小熊'], color: '#C68B59', bg: '#E8F4F8', ears: `<circle cx="65" cy="55" r="18" fill="#C68B59"/><circle cx="135" cy="55" r="18" fill="#C68B59"/><circle cx="65" cy="55" r="10" fill="#E6B999"/><circle cx="135" cy="55" r="10" fill="#E6B999"/>` },
+            'cat': { name: '小貓', keywords: ['貓', 'cat', '小貓'], color: '#F9B233', bg: '#F3F8E8', ears: `<polygon points="50,70 65,30 85,60" fill="#F9B233"/><polygon points="150,70 135,30 115,60" fill="#F9B233"/><polygon points="56,65 65,42 77,60" fill="#FFDCA8"/><polygon points="144,65 135,42 123,60" fill="#FFDCA8"/>`, extraFace: `<path d="M 60 95 L 40 90 M 60 100 L 38 100 M 60 105 L 40 110 M 140 95 L 160 90 M 140 100 L 162 100 M 140 105 L 160 110" stroke="#B07A1D" stroke-width="2" stroke-linecap="round"/>` },
+            'rabbit': { name: '小兔', keywords: ['兔', 'rabbit', '小兔'], color: '#FFFFFF', bg: '#FFF0F5', ears: `<ellipse cx="75" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(-15 75 40)"/><ellipse cx="125" cy="40" rx="12" ry="35" fill="#FFFFFF" transform="rotate(15 125 40)"/><ellipse cx="75" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(-15 75 45)"/><ellipse cx="125" cy="45" rx="6" ry="25" fill="#FFC0CB" transform="rotate(15 125 45)"/>` },
             'frog': { name: '青蛙', keywords: ['蛙', 'frog', '青蛙'], color: '#81C784', bg: '#FFFDE7', ears: `<circle cx="70" cy="65" r="18" fill="#81C784"/><circle cx="130" cy="65" r="18" fill="#81C784"/>`, isFrog: true }
         };
 
@@ -438,115 +293,124 @@
             'brush_teeth': { text: '刷牙' }, 'car': { text: '揸車' }
         };
 
-        // === 遊戲全域狀態 ===
-        let currentScore = 0;
-        const targetScore = 10;
-        let currentRoundCards = []; 
-        let targetAnimalKey = '';   
+        let currentScore = 0; const targetScore = 10;
+        let targetAnimalKey = ''; let currentTargetAction = ''; 
         let isAnsweredCorrectly = false; 
 
-        // === Web Audio API (合成音效) ===
+        // === 音效與語音 ===
         let audioCtx;
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator(); osc.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.01);
             }
         }
+        document.body.addEventListener('touchstart', initAudio, { once: true });
+        document.body.addEventListener('click', initAudio, { once: true });
+
         function playSound(type) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
+            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
             if (type === 'correct') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.5);
             } else if (type === 'wrong') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            } else if (type === 'win') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
-                osc.frequency.setValueAtTime(1200, audioCtx.currentTime + 0.3);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
-                osc.start(); osc.stop(audioCtx.currentTime + 1);
             }
         }
 
-        // === 語音朗讀 (TTS) ===
         function speakText(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 停止之前的朗讀
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'zh-HK'; // 設定為廣東話
-                utterance.rate = 0.9;     // 稍微放慢語速讓小朋友聽得清楚
+                utterance.lang = 'zh-HK'; utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // === 語音辨識 (Speech-to-Text) ===
+        // === 強化的語音辨識機制 ===
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isListening = false;
 
         if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'yue-Hant-HK'; // 廣東話
-            recognition.continuous = false;
-            recognition.interimResults = false;
+            try {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'yue-Hant-HK'; 
+                recognition.continuous = false;
+                recognition.interimResults = false;
 
-            recognition.onstart = function() {
-                isListening = true;
-                document.getElementById('micBtn').classList.add('listening');
-                document.getElementById('recordingStatus').style.display = 'block';
-            };
+                recognition.onstart = function() {
+                    isListening = true;
+                    document.getElementById('micBtn').classList.add('listening');
+                    document.getElementById('recordingStatus').style.display = 'block';
+                };
 
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                checkVoiceAnswer(transcript);
-            };
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    checkVoiceAnswer(transcript);
+                };
 
-            recognition.onerror = function(event) {
-                if(event.error === 'not-allowed') {
-                    alert("請允許使用麥克風才能進行錄音作答喔！");
-                }
-                stopListening();
-            };
+                recognition.onerror = function(event) {
+                    stopListening();
+                    console.error("語音錯誤:", event.error);
+                    
+                    // 偵測是否為本地端開啟 (file://)
+                    const isLocalFile = window.location.protocol === 'file:';
 
-            recognition.onend = function() {
-                stopListening();
-            };
+                    if (event.error === 'not-allowed') {
+                        if (isLocalFile) {
+                            alert("⚠️ 蘋果系統限制警告：\n您目前是直接從檔案打開遊戲。Safari 嚴格規定「必須在 HTTPS 網站上」才能開啟麥克風，因此自動封鎖了錄音功能。\n\n💡 解決方式：\n請先使用畫面上的「💡 提示」按鈕，改為『手動點擊圖片』來讓小朋友遊玩！");
+                        } else {
+                            alert("錄音失敗：麥克風權限被拒絕。\n(iPad 請至「設定 > Safari > 麥克風」選擇允許)");
+                        }
+                    } else if (event.error === 'service-not-allowed') {
+                        alert("⚠️ 語音服務無法使用！\n請確保您的 iPad 在「設定 > 一般 > 鍵盤」中已經開啟了「啟用聽寫」功能。\n如果暫時無法開啟，請點擊「💡 提示」改用點擊圖片的方式遊玩。");
+                    } else if (event.error === 'network') {
+                        alert("錄音失敗：請檢查網路連線。");
+                    } else if (event.error !== 'no-speech') {
+                        alert("錄音系統發生錯誤：" + event.error + "\n(請暫時使用「💡 提示」按鈕進行遊戲)");
+                    }
+                };
+
+                recognition.onend = function() { stopListening(); };
+            } catch (e) {
+                console.error("SpeechRecognition 初始化失敗", e);
+                recognition = null;
+            }
         }
 
         function toggleListening() {
+            initAudio(); // 確保使用者互動
             if (!recognition) {
-                alert("你嘅瀏覽器暫時唔支援語音辨識功能，請用『提示』按鈕揀答案啦！");
+                alert("此瀏覽器/環境無法使用語音功能。\n\n建議您先點擊「💡 提示」按鈕，改用點擊圖片的方式遊玩！");
                 return;
             }
             if (isListening) {
                 stopListening();
             } else {
-                initAudio(); // 確保解鎖音效
-                recognition.start();
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error("start() 錯誤:", e);
+                    
+                    if (window.location.protocol === 'file:') {
+                        alert("⚠️ 蘋果系統限制警告：\n您目前是直接從檔案打開遊戲。Safari 嚴格規定「必須在 HTTPS 網站上」才能開啟麥克風。\n\n💡 解決方式：\n請先使用畫面上的「💡 提示」按鈕，改為『手動點擊圖片』來遊玩！");
+                    } else {
+                        alert("啟動麥克風失敗，請重新整理網頁再試一次。");
+                    }
+                    stopListening();
+                }
             }
         }
 
         function stopListening() {
-            if(recognition && isListening) {
-                recognition.stop();
-            }
+            if(recognition && isListening) { try { recognition.stop(); } catch(e) {} }
             isListening = false;
             document.getElementById('micBtn').classList.remove('listening');
             document.getElementById('recordingStatus').style.display = 'none';
@@ -554,298 +418,113 @@
 
         function checkVoiceAnswer(transcript) {
             if (isAnsweredCorrectly) return;
-
             const correctKeywords = animals[targetAnimalKey].keywords;
-            const isCorrect = correctKeywords.some(kw => transcript.includes(kw));
-
-            if (isCorrect) {
-                revealAnswers();
-                checkAnswer(targetAnimalKey);
+            if (correctKeywords.some(kw => transcript.includes(kw))) {
+                revealAnswers(); checkAnswer(targetAnimalKey);
             } else {
                 let isOtherAnimal = false;
                 for (let key in animals) {
                     if (key !== targetAnimalKey && animals[key].keywords.some(kw => transcript.includes(kw))) {
                         isOtherAnimal = true;
-                        revealAnswers();
-                        checkAnswer(key); 
+                        playSound('wrong'); showMessage('❌ 唔係佢喎！', '#EF5350');
+                        document.getElementById('micBtn').classList.add('shake-anim');
+                        setTimeout(() => document.getElementById('micBtn').classList.remove('shake-anim'), 500);
+                        speakText(`唔係佢喎。再聽多次，邊個喺度 ${actions[currentTargetAction].text} 呀？`);
                         break;
                     }
                 }
-                
-                if (!isOtherAnimal) {
-                    showMessage('聽唔清楚，再講一次吖！', '#FF9800');
-                    speakText('聽唔清楚，再講一次吖');
-                }
+                if (!isOtherAnimal) { showMessage('聽唔清楚，再講一次！', '#FF9800'); speakText('聽唔清楚，再講一次'); }
             }
         }
 
-        // === 畫面與流程控制 ===
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
-
-        function startGame() {
-            initAudio(); 
-            switchPage('gamePage');
-            currentScore = 0;
-            updateProgress();
-            initRound();
-        }
-
-        function resetGame() {
-            switchPage('coverPage');
-        }
-
-        function updateProgress() {
-            document.getElementById('scoreText').textContent = `${currentScore} / ${targetScore}`;
-            const percent = (currentScore / targetScore) * 100;
-            document.getElementById('progressBar').style.width = `${percent}%`;
-        }
+        // === 遊戲流程 ===
+        document.getElementById('startBtn').addEventListener('click', () => { initAudio(); document.getElementById('coverPage').classList.remove('active'); document.getElementById('gamePage').classList.add('active'); currentScore = 0; updateProgress(); initRound(); });
+        function resetGame() { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('coverPage').classList.add('active'); }
+        function updateProgress() { document.getElementById('scoreText').textContent = `${currentScore} / ${targetScore}`; document.getElementById('progressBar').style.width = `${(currentScore / targetScore) * 100}%`; }
 
         function initRound() {
-            isAnsweredCorrectly = false;
-            stopListening();
-            
-            document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('answerSection').style.display = 'none';
-            document.getElementById('showHintArea').style.display = 'flex';
-
-            const allAnimals = Object.keys(animals);
-            const allActions = Object.keys(actions);
-            
-            const selectedAnimals = shuffle([...allAnimals]).slice(0, 4);
-            const selectedActions = shuffle([...allActions]).slice(0, 4);
-
-            currentRoundCards = [];
-            for (let i = 0; i < 4; i++) {
-                currentRoundCards.push({ animal: selectedAnimals[i], action: selectedActions[i] });
-            }
-
+            isAnsweredCorrectly = false; stopListening();
+            document.getElementById('nextBtn').style.display = 'none'; document.getElementById('answerSection').style.display = 'none'; document.getElementById('showHintArea').style.display = 'flex';
+            const selectedAnimals = shuffle(Object.keys(animals)).slice(0, 4);
+            const selectedActions = shuffle(Object.keys(actions)).slice(0, 4);
+            const roundCards = selectedAnimals.map((animal, i) => ({ animal, action: selectedActions[i] }));
             const targetIndex = Math.floor(Math.random() * 4);
-            const targetAction = currentRoundCards[targetIndex].action;
-            targetAnimalKey = currentRoundCards[targetIndex].animal; 
+            currentTargetAction = roundCards[targetIndex].action; targetAnimalKey = roundCards[targetIndex].animal; 
+            document.getElementById('actionText').textContent = actions[currentTargetAction].text;
+            setTimeout(() => { speakText(`邊個喺度 ${actions[currentTargetAction].text} 呀？`); }, 300);
 
-            const questionStr = actions[targetAction].text;
-            document.getElementById('actionText').textContent = questionStr;
-
-            setTimeout(() => { speakText(`邊個喺度 ${questionStr} 呀？`); }, 300);
-
-            const actionContainer = document.getElementById('actionCardsContainer');
-            actionContainer.innerHTML = '';
-            currentRoundCards.forEach((card) => {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'action-card';
-                cardDiv.innerHTML = generateBeautifulSVG(card.animal, card.action);
-                actionContainer.appendChild(cardDiv);
+            const actionContainer = document.getElementById('actionCardsContainer'); actionContainer.innerHTML = '';
+            roundCards.forEach((card) => {
+                const cardDiv = document.createElement('div'); cardDiv.className = 'action-card';
+                cardDiv.innerHTML = generateSVG(card.animal, card.action); actionContainer.appendChild(cardDiv);
             });
 
-            const answerContainer = document.getElementById('answerCardsContainer');
-            answerContainer.innerHTML = '';
-            const shuffledAnimalsForAnswers = shuffle([...selectedAnimals]);
-            shuffledAnimalsForAnswers.forEach((animalKey) => {
-                const answerDiv = document.createElement('div');
-                answerDiv.className = 'answer-card';
-                answerDiv.id = `answer-${animalKey}`;
-                answerDiv.innerHTML = generateBeautifulSVG(animalKey, 'portrait');
+            const answerContainer = document.getElementById('answerCardsContainer'); answerContainer.innerHTML = '';
+            shuffle([...selectedAnimals]).forEach((animalKey) => {
+                const answerDiv = document.createElement('div'); answerDiv.className = 'answer-card'; answerDiv.id = `answer-${animalKey}`;
+                answerDiv.innerHTML = generateSVG(animalKey, 'portrait');
                 answerDiv.onclick = () => { initAudio(); checkAnswer(animalKey); };
                 answerContainer.appendChild(answerDiv);
             });
         }
 
-        function revealAnswers() {
-            document.getElementById('showHintArea').style.display = 'none';
-            document.getElementById('answerSection').style.display = 'block';
-        }
+        function revealAnswers() { document.getElementById('showHintArea').style.display = 'none'; document.getElementById('answerSection').style.display = 'block'; }
 
-        function checkAnswer(selectedAnimalKey) {
-            if (isAnsweredCorrectly) return; 
-
-            const answerCardEl = document.getElementById(`answer-${selectedAnimalKey}`);
-            if (!answerCardEl) return; 
-
-            if (selectedAnimalKey === targetAnimalKey) {
-                isAnsweredCorrectly = true;
-                stopListening();
-                answerCardEl.classList.add('correct');
-                playSound('correct');
-                currentScore++;
-                updateProgress();
-
-                const allAnswerCards = document.querySelectorAll('.answer-card');
-                allAnswerCards.forEach(card => {
-                    if (card.id !== `answer-${targetAnimalKey}`) card.classList.add('disabled');
-                });
-
+        function checkAnswer(animalKey) {
+            if (isAnsweredCorrectly) return;
+            const answerCard = document.getElementById(`answer-${animalKey}`); if (!answerCard) return;
+            if (animalKey === targetAnimalKey) {
+                isAnsweredCorrectly = true; stopListening(); answerCard.classList.add('correct'); playSound('correct'); currentScore++; updateProgress();
+                document.querySelectorAll('.answer-card').forEach(c => { if (c.id !== `answer-${targetAnimalKey}`) c.classList.add('disabled'); });
                 if (currentScore >= targetScore) {
-                    // 修改：合併最後一題的語音，避免重疊切斷
-                    showMessage('🎉 答啱喇！好叻呀！', '#4CAF50');
-                    speakText('答啱喇！好叻呀！恭喜你過關喇！你真係好叻！');
-                    createConfetti();
-                    
-                    // 延長跳轉畫面的等待時間，讓小朋友有時間聽完長語音
-                    setTimeout(() => {
-                        playSound('win');
-                        switchPage('winPage');
-                        createConfetti(100);
-                    }, 4000);
+                    showMessage('🎉 好叻呀！', '#4CAF50'); speakText('恭喜你過關喇！你真係好叻！');
+                    setTimeout(() => { document.getElementById('gamePage').classList.remove('active'); document.getElementById('winPage').classList.add('active'); }, 3000);
                 } else {
-                    showMessage('🎉 答啱喇！好叻呀！', '#4CAF50');
-                    speakText('答啱喇！好叻呀！');
-                    createConfetti();
+                    showMessage('🎉 答啱喇！', '#4CAF50'); speakText('答啱喇！');
                     document.getElementById('nextBtn').style.display = 'block';
                 }
             } else {
-                playSound('wrong');
-                answerCardEl.classList.add('wrong');
-                // 修改：文字和語音皆改為「唔係佢喎」
-                showMessage('❌ 唔係佢喎，再試吓啦！', '#EF5350');
-                speakText('唔係佢喎，再試吓啦！');
-                setTimeout(() => { answerCardEl.classList.remove('wrong'); }, 500);
+                playSound('wrong'); answerCard.classList.add('wrong'); showMessage('❌ 唔係佢喎！', '#EF5350');
+                speakText(`唔係佢喎。再聽多次，邊個喺度 ${actions[currentTargetAction].text} 呀？`);
+                setTimeout(() => { answerCard.classList.remove('wrong'); }, 500);
             }
         }
 
-        // === 工具與特效 ===
+        function shuffle(arr) { for(let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+        function showMessage(text, color) { const overlay = document.getElementById('messageOverlay'); overlay.textContent = text; overlay.style.color = color; overlay.classList.add('show'); setTimeout(() => { overlay.classList.remove('show'); }, 1500); }
 
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
-        function showMessage(text, color) {
-            const overlay = document.getElementById('messageOverlay');
-            overlay.textContent = text;
-            overlay.style.color = color;
-            overlay.classList.add('show');
-            setTimeout(() => { overlay.classList.remove('show'); }, 1500);
-        }
-
-        function createConfetti(amount = 50) {
-            const colors = ['#f2d74e', '#95c3de', '#ff9a91', '#4CAF50', '#FF8C42'];
-            for (let i = 0; i < amount; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                document.body.appendChild(confetti);
-
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.backgroundColor = color;
-                
-                const startX = Math.random() * window.innerWidth;
-                const endX = startX + (Math.random() * 200 - 100);
-                const endY = window.innerHeight + 50;
-                
-                confetti.style.left = startX + 'px';
-                confetti.style.top = '-20px';
-                if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
-
-                const duration = Math.random() * 2 + 1;
-                confetti.animate([
-                    { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
-                    { transform: `translate3d(${endX - startX}px, ${endY}px, 0) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-                ], { duration: duration * 1000, easing: 'cubic-bezier(.37,0,.63,1)' });
-
-                setTimeout(() => { confetti.remove(); }, duration * 1000);
-            }
-        }
-
-        // === SVG 生成 ===
-        function generateBeautifulSVG(animalKey, actKey) {
-            const animal = animals[animalKey];
-            const isFrog = animal.isFrog || false;
-            let faceState = 'awake'; 
-            let leftArm = `<rect x="50" y="115" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(15 60 115)"/>`; 
-            let rightArm = `<rect x="130" y="115" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(-15 140 115)"/>`; 
-            let propLayer = ''; let foregroundLayer = '';
-            let bodyModifier = `<rect x="65" y="100" width="70" height="70" rx="35" fill="${animal.color}"/>`; 
+        function generateSVG(animalKey, actKey) {
+            const animal = animals[animalKey]; const isFrog = animal.isFrog;
+            let faceState = 'awake'; let lArm = `<rect x="50" y="115" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(15 60 115)"/>`; let rArm = `<rect x="130" y="115" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(-15 140 115)"/>`; let prop = ''; let fg = ''; let body = `<rect x="65" y="100" width="70" height="70" rx="35" fill="${animal.color}"/>`; 
 
             switch(actKey) {
-                case 'drink': rightArm = `<path d="M 135 125 L 123 113" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; foregroundLayer = `<g transform="translate(105, 100)"><path d="M 0 0 L 22 0 L 18 25 L 4 25 Z" fill="#42A5F5"/><path d="M 22 5 A 8 8 0 0 1 22 18" fill="none" stroke="#42A5F5" stroke-width="3"/><rect x="2" y="-2" width="18" height="4" rx="2" fill="#E3F2FD"/></g><circle cx="123" cy="113" r="8" fill="${animal.color}"/>`; break;
-                case 'eat_apple': faceState = 'happy'; rightArm = `<path d="M 135 125 L 124 114" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; foregroundLayer = `<g transform="translate(108, 100)"><circle cx="10" cy="10" r="12" fill="#EF5350"/><path d="M 10 -2 Q 15 -8 20 -2" fill="none" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/></g><circle cx="124" cy="114" r="8" fill="${animal.color}"/>`; break;
-                case 'sleep': faceState = 'sleep'; leftArm = ''; rightArm = ''; bodyModifier = ''; propLayer = `<rect x="40" y="140" width="120" height="40" rx="15" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2"/><path d="M 20 145 Q 100 120 180 145 L 180 190 L 20 190 Z" fill="#FFF9C4" stroke="#FBC02D" stroke-width="3"/><path d="M 20 145 Q 100 120 180 145" fill="none" stroke="#FFFFFF" stroke-width="5"/><text x="140" y="60" font-family="inherit" font-weight="bold" font-size="24" fill="#90A4AE">Z</text><text x="160" y="45" font-family="inherit" font-weight="bold" font-size="16" fill="#90A4AE">z</text><text x="175" y="35" font-family="inherit" font-weight="bold" font-size="12" fill="#90A4AE">z</text>`; break;
-                case 'read_book': leftArm = `<path d="M 60 130 L 72 155" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; rightArm = `<path d="M 140 130 L 128 155" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; foregroundLayer = `<g transform="translate(65, 130)"><path d="M 5 15 L 35 25 L 65 15 L 65 35 L 35 45 L 5 35 Z" fill="#5C6BC0"/><path d="M 5 5 L 35 15 L 65 5 L 65 30 L 35 40 L 5 30 Z" fill="#FFFFFF"/><line x1="35" y1="15" x2="35" y2="40" stroke="#E0E0E0" stroke-width="2"/><line x1="15" y1="12" x2="30" y2="16" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="28" y2="22" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round"/><line x1="40" y1="16" x2="55" y2="12" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round"/><line x1="42" y1="22" x2="58" y2="18" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round"/></g><circle cx="72" cy="155" r="8" fill="${animal.color}"/><circle cx="128" cy="155" r="8" fill="${animal.color}"/>`; break;
-                case 'bath': faceState = 'happy'; leftArm = `<rect x="50" y="125" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(40 60 125)"/>`; rightArm = `<rect x="132" y="125" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(-40 140 125)"/>`; bodyModifier = ''; foregroundLayer = `<path d="M 20 130 L 180 130 L 160 180 L 40 180 Z" fill="#FFFFFF" stroke="#B3E5FC" stroke-width="4"/><path d="M 20 130 L 180 130" stroke="#03A9F4" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="120" r="15" fill="#E1F5FE" opacity="0.8"/><circle cx="65" cy="135" r="20" fill="#E1F5FE" opacity="0.8"/><circle cx="140" cy="125" r="18" fill="#E1F5FE" opacity="0.8"/><circle cx="160" cy="140" r="12" fill="#E1F5FE" opacity="0.8"/><circle cx="100" cy="145" r="25" fill="#E1F5FE" opacity="0.8"/><circle cx="150" cy="90" r="6" fill="#E1F5FE"/><circle cx="50" cy="80" r="8" fill="#E1F5FE"/>`; break;
-                case 'play_ball': rightArm = `<rect x="130" y="110" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(-30 140 110)"/>`; foregroundLayer = `<g transform="translate(145, 155)"><circle cx="0" cy="0" r="22" fill="#FFCA28"/><path d="M -22 0 A 22 22 0 0 0 22 0" fill="#EF5350"/><path d="M -15 -16 A 22 22 0 0 0 15 16" fill="none" stroke="#FFFFFF" stroke-width="3"/><path d="M 15 -16 A 22 22 0 0 1 -15 16" fill="none" stroke="#FFFFFF" stroke-width="3"/></g>`; break;
-                case 'brush_teeth': rightArm = `<path d="M 135 125 L 122 115" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; foregroundLayer = `<g transform="translate(100, 108) rotate(20)"><rect x="0" y="-3" width="35" height="6" rx="3" fill="#26C6DA"/><rect x="2" y="-8" width="12" height="5" fill="#FFFFFF" rx="1"/></g><circle cx="122" cy="115" r="8" fill="${animal.color}"/><circle cx="95" cy="110" r="8" fill="#E1F5FE" opacity="0.9"/><circle cx="106" cy="112" r="5" fill="#E1F5FE" opacity="0.9"/><circle cx="92" cy="102" r="4" fill="#E1F5FE" opacity="0.9"/>`; break;
-                case 'car': faceState = 'happy'; leftArm = `<rect x="45" y="115" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(30 55 115)"/>`; rightArm = `<rect x="137" y="115" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(-30 145 115)"/>`; bodyModifier = ''; foregroundLayer = `<path d="M 60 140 Q 100 120 140 140" fill="none" stroke="#424242" stroke-width="8" stroke-linecap="round"/><path d="M 10 140 L 190 140 L 170 190 L 30 190 Z" fill="#EF5350"/><circle cx="40" cy="165" r="12" fill="#FFF59D"/><circle cx="160" cy="165" r="12" fill="#FFF59D"/><rect x="80" y="170" width="40" height="15" rx="3" fill="#FFFFFF"/><rect x="15" y="130" width="10" height="15" rx="4" fill="#E53935"/><rect x="175" y="130" width="10" height="15" rx="4" fill="#E53935"/>`; break;
+                case 'drink': rArm = `<path d="M 135 125 L 123 113" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; fg = `<g transform="translate(105, 100)"><path d="M 0 0 L 22 0 L 18 25 L 4 25 Z" fill="#42A5F5"/><path d="M 22 5 A 8 8 0 0 1 22 18" fill="none" stroke="#42A5F5" stroke-width="3"/><rect x="2" y="-2" width="18" height="4" rx="2" fill="#E3F2FD"/></g><circle cx="123" cy="113" r="8" fill="${animal.color}"/>`; break;
+                case 'eat_apple': faceState = 'happy'; rArm = `<path d="M 135 125 L 124 114" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; fg = `<g transform="translate(108, 100)"><circle cx="10" cy="10" r="12" fill="#EF5350"/><path d="M 10 -2 Q 15 -8 20 -2" fill="none" stroke="#66BB6A" stroke-width="3" stroke-linecap="round"/></g><circle cx="124" cy="114" r="8" fill="${animal.color}"/>`; break;
+                case 'sleep': faceState = 'sleep'; lArm = ''; rArm = ''; body = ''; prop = `<rect x="40" y="140" width="120" height="40" rx="15" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2"/><path d="M 20 145 Q 100 120 180 145 L 180 190 L 20 190 Z" fill="#FFF9C4" stroke="#FBC02D" stroke-width="3"/><text x="140" y="60" font-weight="bold" font-size="24" fill="#90A4AE">Z</text><text x="160" y="45" font-weight="bold" font-size="16" fill="#90A4AE">z</text>`; break;
+                case 'read_book': lArm = `<path d="M 60 130 L 72 155" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; rArm = `<path d="M 140 130 L 128 155" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; fg = `<g transform="translate(65, 130)"><path d="M 5 15 L 35 25 L 65 15 L 65 35 L 35 45 L 5 35 Z" fill="#5C6BC0"/><path d="M 5 5 L 35 15 L 65 5 L 65 30 L 35 40 L 5 30 Z" fill="#FFFFFF"/><line x1="35" y1="15" x2="35" y2="40" stroke="#E0E0E0" stroke-width="2"/></g><circle cx="72" cy="155" r="8" fill="${animal.color}"/><circle cx="128" cy="155" r="8" fill="${animal.color}"/>`; break;
+                case 'bath': faceState = 'happy'; lArm = `<rect x="50" y="125" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(40 60 125)"/>`; rArm = `<rect x="132" y="125" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(-40 140 125)"/>`; body = ''; fg = `<path d="M 20 130 L 180 130 L 160 180 L 40 180 Z" fill="#FFFFFF" stroke="#B3E5FC" stroke-width="4"/><circle cx="65" cy="135" r="20" fill="#E1F5FE" opacity="0.8"/><circle cx="140" cy="125" r="18" fill="#E1F5FE" opacity="0.8"/>`; break;
+                case 'play_ball': rArm = `<rect x="130" y="110" width="20" height="40" rx="10" fill="${animal.color}" transform="rotate(-30 140 110)"/>`; fg = `<g transform="translate(145, 155)"><circle cx="0" cy="0" r="22" fill="#FFCA28"/><path d="M -22 0 A 22 22 0 0 0 22 0" fill="#EF5350"/></g>`; break;
+                case 'brush_teeth': rArm = `<path d="M 135 125 L 122 115" stroke="${animal.color}" stroke-width="16" stroke-linecap="round"/>`; fg = `<g transform="translate(100, 108) rotate(20)"><rect x="0" y="-3" width="35" height="6" rx="3" fill="#26C6DA"/><rect x="2" y="-8" width="12" height="5" fill="#FFFFFF" rx="1"/></g><circle cx="122" cy="115" r="8" fill="${animal.color}"/>`; break;
+                case 'car': faceState = 'happy'; lArm = `<rect x="45" y="115" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(30 55 115)"/>`; rArm = `<rect x="137" y="115" width="18" height="35" rx="9" fill="${animal.color}" transform="rotate(-30 145 115)"/>`; body = ''; fg = `<path d="M 60 140 Q 100 120 140 140" fill="none" stroke="#424242" stroke-width="8" stroke-linecap="round"/><path d="M 10 140 L 190 140 L 170 190 L 30 190 Z" fill="#EF5350"/><circle cx="40" cy="165" r="12" fill="#FFF59D"/><circle cx="160" cy="165" r="12" fill="#FFF59D"/>`; break;
             }
 
             let eyes = ''; let mouth = ''; let blush = `<circle cx="70" cy="100" r="8" fill="#FF8A80" opacity="0.5"/><circle cx="130" cy="100" r="8" fill="#FF8A80" opacity="0.5"/>`;
-
             if (isFrog) {
                 blush = `<circle cx="65" cy="100" r="8" fill="#4CAF50" opacity="0.5"/><circle cx="135" cy="100" r="8" fill="#4CAF50" opacity="0.5"/>`;
-                if (faceState === 'sleep') { eyes = `<path d="M 60 65 Q 70 72 80 65" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/><path d="M 120 65 Q 130 72 140 65" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/>`; } 
-                else { eyes = `<circle cx="70" cy="65" r="10" fill="#FFFFFF"/><circle cx="70" cy="65" r="4" fill="#000000"/><circle cx="130" cy="65" r="10" fill="#FFFFFF"/><circle cx="130" cy="65" r="4" fill="#000000"/>`; }
+                if (faceState === 'sleep') eyes = `<path d="M 60 65 Q 70 72 80 65" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/><path d="M 120 65 Q 130 72 140 65" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/>`;
+                else eyes = `<circle cx="70" cy="65" r="10" fill="#FFFFFF"/><circle cx="70" cy="65" r="4" fill="#000000"/><circle cx="130" cy="65" r="10" fill="#FFFFFF"/><circle cx="130" cy="65" r="4" fill="#000000"/>`;
                 mouth = (faceState === 'happy') ? `<path d="M 80 95 Q 100 110 120 95" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/>` : `<path d="M 85 95 Q 100 105 115 95" fill="none" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/>`;
             } else {
                 if (faceState === 'sleep') { eyes = `<path d="M 75 90 Q 82 95 89 90" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/><path d="M 111 90 Q 118 95 125 90" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>`; mouth = `<circle cx="100" cy="105" r="3" fill="#3E2723"/>`; } 
                 else if (faceState === 'happy') { eyes = `<path d="M 75 90 Q 82 85 89 90" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/><path d="M 111 90 Q 118 85 125 90" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>`; mouth = `<path d="M 90 102 Q 100 115 110 102" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>`; } 
                 else { eyes = `<circle cx="82" cy="90" r="4.5" fill="#3E2723"/><circle cx="118" cy="90" r="4.5" fill="#3E2723"/>`; mouth = `<path d="M 92 105 Q 100 112 108 105" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>`; }
-
                 if (animalKey === 'cat') { mouth += `<polygon points="96,100 104,100 100,104" fill="#EF5350"/><path d="M 100 104 L 100 108" stroke="#3E2723" stroke-width="2"/>`; } 
-                else if (animalKey === 'rabbit') { mouth += `<circle cx="100" cy="98" r="3" fill="#FF8A80"/><path d="M 100 101 L 100 105" stroke="#3E2723" stroke-width="2"/>`; } 
-                else if (animalKey === 'bear') { mouth += `<ellipse cx="100" cy="98" rx="7" ry="5" fill="#3E2723"/>`; }
+                else if (animalKey === 'rabbit') mouth += `<circle cx="100" cy="98" r="3" fill="#FF8A80"/>`; 
+                else if (animalKey === 'bear') mouth += `<ellipse cx="100" cy="98" rx="7" ry="5" fill="#3E2723"/>`;
             }
 
-            return `<svg viewBox="0 0 200 200" width="100%" height="100%" style="max-height: 100%;"><circle cx="100" cy="100" r="95" fill="${animal.bg}"/><g>${animal.ears}${bodyModifier}${leftArm}<circle cx="100" cy="90" r="40" fill="${animal.color}"/>${animal.extraFace || ''}${blush}${eyes}${mouth}${propLayer}${rightArm}${foregroundLayer}</g></svg>`;
+            return `<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="95" fill="${animal.bg}"/><g>${animal.ears}${body}${lArm}<circle cx="100" cy="90" r="40" fill="${animal.color}"/>${animal.extraFace || ''}${blush}${eyes}${mouth}${prop}${rArm}${fg}</g></svg>`;
         }
     </script>
-<!-- 答錯次數升級補丁開始 -->
-<script>
-    // 1. 建立一個專屬嘅計數器 (避免同你原本嘅代碼撞名)
-    window.myGameWrongAttempts = 0;
-
-    // 2. 攔截並保留原本嘅 initRound (自動喺每局重置次數)
-    const originalInitRound = initRound;
-    initRound = function() {
-        window.myGameWrongAttempts = 0; 
-        if (originalInitRound) originalInitRound(); 
-    };
-
-    // 3. 直接覆蓋原本嘅 checkVoiceAnswer 語音檢查邏輯
-    checkVoiceAnswer = function(transcript) {
-        if (isAnsweredCorrectly) return;
-
-        const correctKeywords = animals[targetAnimalKey].keywords;
-        const isCorrect = correctKeywords.some(kw => transcript.includes(kw));
-
-        if (isCorrect) {
-            revealAnswers();
-            checkAnswer(targetAnimalKey);
-        } else {
-            let isOtherAnimal = false;
-            for (let key in animals) {
-                if (key !== targetAnimalKey && animals[key].keywords.some(kw => transcript.includes(kw))) {
-                    isOtherAnimal = true;
-                    window.myGameWrongAttempts++; 
-                    
-                    if (window.myGameWrongAttempts === 1) {
-                        // 第一次答錯：只出聲同字提示，唔彈出選項
-                        if (typeof playSound === 'function') playSound('wrong'); 
-                        if (typeof showMessage === 'function') showMessage('❌ 唔係佢喎，再試吓啦！', '#EF5350');
-                        if (typeof speakText === 'function') speakText('唔係佢喎，再試吓啦！');
-                    } else {
-                        // 第二次答錯：出選項
-                        revealAnswers();
-                        checkAnswer(key); 
-                    }
-                    break;
-                }
-            }
-            
-            if (!isOtherAnimal) {
-                if (typeof showMessage === 'function') showMessage('聽唔清楚，再講一次吖！', '#FF9800');
-                if (typeof speakText === 'function') speakText('聽唔清楚，再講一次吖');
-            }
-        }
-    };
-</script>
-<!-- 答錯次數升級補丁結束 -->
 </body>
 </html>
-
